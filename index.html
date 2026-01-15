@@ -1,147 +1,478 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Momentum Tracker</title>
-<meta name="theme-color" content="#0b0b0b">
-<style>
-:root{--bg:#0b0b0b;--card:#131313;--muted:#a8a8a8;--text:#f2f2f2;--line:#242424}
-body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
-.wrap{max-width:720px;margin:0 auto;padding:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
-header{display:flex;justify-content:space-between;align-items:center}
-h1{font-size:18px;margin:0}
-.date{color:var(--muted);font-size:13px}
-.secTitle{font-size:13px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
-.task{display:flex;gap:10px;padding:8px}
-input{width:20px;height:20px}
-label{cursor:pointer}
-.pill{font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-.sub{color:var(--muted);font-size:13px}
-textarea{width:100%;min-height:180px;background:#101010;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px;font-family:monospace}
-button{background:#1c1c1c;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-.btns{display:flex;gap:10px;flex-wrap:wrap}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Momentum Tracker</title>
+  <meta name="theme-color" content="#0b0b0b" />
+  <style>
+    :root { --bg:#0b0b0b; --card:#131313; --muted:#a8a8a8; --text:#f2f2f2; --line:#242424; }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--text); }
+    .wrap{ max-width:760px; margin:0 auto; padding:18px; }
+    header{ display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    h1{ font-size:18px; margin:0; letter-spacing:.2px; }
+    .date{ color:var(--muted); font-size:13px; }
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; margin:12px 0; }
+    .row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .sub{ color:var(--muted); font-size:13px; margin-top:4px; }
+    .secTitle{ font-size:13px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin:0 0 10px 0; }
+    .task{ display:flex; align-items:flex-start; gap:10px; padding:10px 8px; border-radius:12px; border:1px solid transparent; }
+    .task:hover{ border-color: var(--line); }
+    input[type="checkbox"]{ width:20px; height:20px; margin-top:2px; }
+    .task label{ flex:1; cursor:pointer; }
+    .pill{ font-size:12px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted); }
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    button{
+      background:#1c1c1c; color:var(--text);
+      border:1px solid var(--line);
+      border-radius:12px; padding:10px 12px;
+      cursor:pointer; font-weight:600;
+    }
+    button:hover{ filter:brightness(1.1); }
+    button.primary{ background:#2a2a2a; }
+    textarea{
+      width:100%; min-height:180px; resize:vertical;
+      background:#101010; color:var(--text);
+      border:1px solid var(--line);
+      border-radius:12px; padding:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size:12px; line-height:1.4;
+    }
+    .done{ text-align:center; padding:26px 14px; }
+    .done h2{ margin:0 0 8px 0; font-size:22px; }
+    .done p{ margin:0; color:var(--muted); }
+    .hr{ height:1px; background:var(--line); margin:10px 0; }
+    details summary{ cursor:pointer; user-select:none; }
+    details summary::marker{ color: var(--muted); }
+    .tiny{ font-size:12px; color:var(--muted); }
+  </style>
 </head>
-
 <body>
-<div class="wrap">
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Momentum Tracker</h1>
+        <div class="date" id="dateLine"></div>
+      </div>
+      <div class="pill" id="streakPill">Streak: 0</div>
+    </header>
 
-<header>
-<div>
-<h1>Momentum Tracker</h1>
-<div class="date" id="dateLine"></div>
-</div>
-<div class="pill" id="streakPill">Streak: 0</div>
-</header>
+    <div class="card">
+      <div class="row">
+        <div>
+          <div style="font-weight:700" id="focusPhrase"></div>
+          <div class="sub">Open twice a day: morning + evening. Tick → it disappears.</div>
+        </div>
+        <div class="pill" id="anchorPill">Anchors: 0/5</div>
+      </div>
+    </div>
 
-<div class="card">
-<strong>I do the next right action — every day.</strong>
-<div class="sub">Tick → it disappears</div>
-<div class="pill" id="anchorPill">Anchors: 0/5</div>
-</div>
+    <div id="app"></div>
 
-<div id="app"></div>
+    <div class="card">
+      <details>
+        <summary class="row">
+          <p class="secTitle" style="margin:0">Settings</p>
+          <span class="pill">Tap to open</span>
+        </summary>
 
-<div class="card">
-<details>
-<summary class="secTitle">Settings (tap to open)</summary>
-<textarea id="settingsBox"></textarea>
-<div class="btns">
-<button id="saveSettings">Save</button>
-<button id="resetToday">Reset Today</button>
-</div>
-</details>
-</div>
+        <div style="margin-top:12px;">
+          <div class="sub" style="margin-bottom:10px;">
+            Only change this if we agree to tweak. (For 7 days: don’t touch it 😄)
+          </div>
 
-</div>
+          <textarea id="settingsBox"></textarea>
+
+          <div class="btns">
+            <button class="primary" id="saveSettings">Save Settings</button>
+            <button id="exportBtn">Export Data</button>
+            <button id="importBtn">Import Data</button>
+            <button id="resetTodayBtn">Reset Today (untick all)</button>
+          </div>
+
+          <div class="tiny" style="margin-top:10px;">
+            Tip: Export once a week so you’ve got a backup.
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
 
 <script>
 (() => {
-const LS="momentum_final";
-const today=()=>new Date().toISOString().slice(0,10);
-const pretty=d=>new Date(d).toDateString();
+  const LS_KEY = "momentum_tracker_v2";
 
-const defaults={
-anchors:["move","breakfast","care","invite","admin"],
-anchors_required:5,
-sections:[
-{title:"Life & Fuel (Start)",tasks:["pre"]},
-{title:"Daily Anchors",tasks:["move","breakfast","care","invite","admin"]},
-{title:"Business",tasks:["followup","post","collate","engage","coach"]},
-{title:"Life & Fuel (Meals)",tasks:["lunch","dinner"]},
-{title:"Evening Reset",tasks:["receipts","bath","bag"]}
-],
-tasks:{
-pre:"Pre-workout drink",
-move:"Move body (workout or walk/run Dumbo)",
-breakfast:"Post-workout Herbalife breakfast",
-care:"Personal care routine",
-invite:"Invite (1hr or 5 numbers)",
-admin:"Admin (1hr) or Personal development",
-followup:"Follow up inviting",
-post:"Write & post IG + FB",
-collate:"Collate inviting activity",
-engage:"Follow up likes/comments",
-coach:"Connect with 1 coach",
-lunch:"Eat lunch + clear dishes",
-dinner:"Eat dinner",
-receipts:"Complete club receipts (SumUp)",
-bath:"Bath",
-bag:"Pack bag for tomorrow"
-}
-};
+  const pad2 = n => String(n).padStart(2, "0");
+  const yyyyMmDd = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 
-const state=JSON.parse(localStorage.getItem(LS))||{settings:defaults,days:{}};
-const D=today();
-state.days[D]=state.days[D]||{};
+  const prettyDate = (iso) => {
+    const [y,m,d] = iso.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    return dt.toLocaleDateString(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+  };
 
-document.getElementById("dateLine").textContent=pretty(D);
-document.getElementById("settingsBox").value=JSON.stringify(state.settings,null,2);
+  const safeParse = (s, fb) => { try { const v = JSON.parse(s); return v ?? fb; } catch { return fb; } };
 
-function render(){
-const app=document.getElementById("app");
-app.innerHTML="";
-let anchorsDone=0;
+  const defaultSettings = {
+    profile: { name: "Duncan", focusPhrase: "I do the next right action — every day." },
 
-state.settings.sections.forEach(sec=>{
-const card=document.createElement("div");
-card.className="card";
-card.innerHTML=`<p class="secTitle">${sec.title}</p>`;
-sec.tasks.forEach(id=>{
-if(state.days[D][id])return;
-const row=document.createElement("div");
-row.className="task";
-row.innerHTML=`<input type="checkbox"><label>${state.settings.tasks[id]}</label>`;
-row.querySelector("input").onchange=()=>{
-state.days[D][id]=true;
-localStorage.setItem(LS,JSON.stringify(state));
-render();
-};
-card.appendChild(row);
-});
-app.appendChild(card);
-});
+    // ✅ MUST complete all 5
+    anchors: [
+      { id:"move_body", text:"Move body (workout OR walk/run Dumbo)" },
+      { id:"post_workout_breakfast", text:"Post-workout Herbalife breakfast" },
+      { id:"personal_care", text:"Personal care routine (wash/shower, shave/trim, skincare)" },
+      { id:"invite_block", text:"Invite (1 hour OR 5 numbers)" },
+      { id:"admin_or_pd", text:"Admin (1 hr max) OR Personal development (30 mins)" }
+    ],
+    anchors_required: 5,
 
-state.settings.anchors.forEach(a=>state.days[D][a]&&anchorsDone++);
-document.getElementById("anchorPill").textContent=`Anchors: ${anchorsDone}/5`;
-document.getElementById("streakPill").textContent=`Streak: ${anchorsDone}`;
-}
+    // ✅ Pre-workout BEFORE anchors; breakfast directly after move_body (inside anchors)
+    sections: [
+      {
+        title: "Life & Fuel (Start)",
+        info: "Do this before anchors. Tick → disappears.",
+        taskIds: ["pre_workout_drink"]
+      },
+      {
+        title: "Daily Anchors (streak protection)",
+        info: "Complete ALL 5 to protect streak.",
+        taskIds: ["move_body","post_workout_breakfast","personal_care","invite_block","admin_or_pd"]
+      },
+      {
+        title: "Business",
+        info: "Tick → disappears. No numbers. No totals. Just done.",
+        taskIds: ["follow_up_inviting","post_ig_fb","collate_inviting","follow_up_engagement","connect_coach"]
+      },
+      {
+        title: "Life & Fuel (Meals)",
+        info: "Basics only.",
+        taskIds: ["lunch_dishes","dinner"]
+      },
+      {
+        title: "Evening Reset",
+        info: "Close the day properly.",
+        taskIds: ["club_receipts","bath","pack_bag"]
+      }
+    ],
 
-document.getElementById("saveSettings").onclick=()=>{
-state.settings=JSON.parse(document.getElementById("settingsBox").value);
-localStorage.setItem(LS,JSON.stringify(state));
-location.reload();
-};
+    tasks: {
+      pre_workout_drink: { text:"Pre-workout drink", type:"daily" },
 
-document.getElementById("resetToday").onclick=()=>{
-state.days[D]={};
-localStorage.setItem(LS,JSON.stringify(state));
-render();
-};
+      move_body: { text:"Move body (workout OR walk/run Dumbo)", type:"daily" },
+      post_workout_breakfast: { text:"Post-workout Herbalife breakfast", type:"daily" },
+      personal_care: { text:"Personal care routine", type:"daily" },
+      invite_block: { text:"Invite (1 hour OR 5 numbers)", type:"daily" },
+      admin_or_pd: { text:"Admin (1 hr max) OR Personal development (30 mins)", type:"daily" },
 
-render();
+      follow_up_inviting: { text:"Follow up inviting activity (same day)", type:"daily" },
+      post_ig_fb: { text:"Write & post Instagram + Facebook post", type:"daily" },
+      collate_inviting: { text:"Collate today’s inviting activity", type:"daily" },
+      follow_up_engagement: { text:"Follow up likes & comments", type:"daily" },
+      connect_coach: { text:"Connect with 1 coach", type:"daily" },
+
+      guinea_pig: { text:"🐹 Send 5 Guinea Pig invites", type:"every_other_day" },
+
+      lunch_dishes: { text:"Eat lunch + clear dishes", type:"daily" },
+      dinner: { text:"Eat dinner", type:"daily" },
+
+      club_receipts: { text:"Complete club receipts (check SumUp)", type:"daily" },
+      bath: { text:"Bath", type:"daily" },
+      pack_bag: { text:"Pack bag for tomorrow", type:"daily" }
+    },
+
+    every_other_day: {
+      taskId: "guinea_pig",
+      start_date: yyyyMmDd() // will be kept if you already saved settings
+    },
+
+    hideCompleted: true,
+    showDoneScreen: true
+  };
+
+  const loadState = () => {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return { settings: defaultSettings, days: {} };
+
+    const parsed = safeParse(raw, { settings: defaultSettings, days: {} });
+    parsed.settings = parsed.settings || defaultSettings;
+    parsed.days = parsed.days || {};
+
+    // Fill any missing keys without overwriting your customisations
+    parsed.settings.profile = parsed.settings.profile || defaultSettings.profile;
+    parsed.settings.anchors = parsed.settings.anchors || defaultSettings.anchors;
+    parsed.settings.anchors_required = parsed.settings.anchors_required ?? defaultSettings.anchors_required;
+    parsed.settings.sections = parsed.settings.sections || defaultSettings.sections;
+    parsed.settings.tasks = parsed.settings.tasks || defaultSettings.tasks;
+    parsed.settings.every_other_day = parsed.settings.every_other_day || defaultSettings.every_other_day;
+    parsed.settings.hideCompleted = parsed.settings.hideCompleted ?? defaultSettings.hideCompleted;
+    parsed.settings.showDoneScreen = parsed.settings.showDoneScreen ?? defaultSettings.showDoneScreen;
+
+    return parsed;
+  };
+
+  const saveState = (s) => localStorage.setItem(LS_KEY, JSON.stringify(s));
+
+  const state = loadState();
+  const D = yyyyMmDd();
+
+  if (!state.days[D]) state.days[D] = { done: {}, lastUpdated: Date.now() };
+
+  const appEl = document.getElementById("app");
+  const dateLine = document.getElementById("dateLine");
+  const focusPhrase = document.getElementById("focusPhrase");
+  const settingsBox = document.getElementById("settingsBox");
+  const streakPill = document.getElementById("streakPill");
+  const anchorPill = document.getElementById("anchorPill");
+
+  dateLine.textContent = prettyDate(D);
+  focusPhrase.textContent = state.settings.profile?.focusPhrase || defaultSettings.profile.focusPhrase;
+
+  const isDone = (id) => !!state.days[D].done[id];
+
+  const setDone = (id, value) => {
+    state.days[D].done[id] = !!value;
+    state.days[D].lastUpdated = Date.now();
+    saveState(state);
+    render();
+  };
+
+  const isEveryOtherDayDue = () => {
+    const s = state.settings.every_other_day;
+    if (!s?.start_date) return false;
+    const start = new Date(s.start_date + "T00:00:00");
+    const now = new Date(D + "T00:00:00");
+    const diffDays = Math.floor((now - start) / (1000*60*60*24));
+    if (diffDays < 0) return false;
+    return diffDays % 2 === 0;
+  };
+
+  const visibleTaskIdsForToday = () => {
+    const ids = new Set();
+    (state.settings.sections || []).forEach(sec => (sec.taskIds||[]).forEach(id => ids.add(id)));
+    const eod = state.settings.every_other_day;
+    if (eod?.taskId && isEveryOtherDayDue()) ids.add(eod.taskId);
+    return Array.from(ids);
+  };
+
+  const anchorsStatus = () => {
+    const anchors = state.settings.anchors || [];
+    const required = state.settings.anchors_required ?? 5;
+    const doneCount = anchors.filter(a => isDone(a.id)).length;
+    return { doneCount, required };
+  };
+
+  const computeStreak = () => {
+    const required = state.settings.anchors_required ?? 5;
+    const anchors = state.settings.anchors || [];
+
+    // walk backwards day by day from today
+    let streak = 0;
+    let cursor = new Date(D + "T00:00:00");
+
+    const dayKey = (dt) => `${dt.getFullYear()}-${pad2(dt.getMonth()+1)}-${pad2(dt.getDate())}`;
+
+    while (true) {
+      const k = dayKey(cursor);
+      const rec = state.days[k];
+      if (!rec?.done) break;
+
+      const done = anchors.filter(a => rec.done[a.id]).length;
+      if (done >= required) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const sectionCard = (title, info, taskIds) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const t = document.createElement("p");
+    t.className = "secTitle";
+    t.textContent = title;
+    card.appendChild(t);
+
+    if (info) {
+      const i = document.createElement("div");
+      i.className = "sub";
+      i.style.marginBottom = "10px";
+      i.textContent = info;
+      card.appendChild(i);
+    }
+
+    const list = document.createElement("div");
+    const visibleIds = visibleTaskIdsForToday();
+    const filtered = (taskIds || []).filter(id => visibleIds.includes(id));
+
+    filtered.forEach(id => {
+      const meta = state.settings.tasks[id];
+      if (!meta) return;
+      if (state.settings.hideCompleted && isDone(id)) return;
+
+      const row = document.createElement("div");
+      row.className = "task";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = "cb_" + id;
+      cb.checked = isDone(id);
+      cb.addEventListener("change", () => setDone(id, cb.checked));
+
+      const label = document.createElement("label");
+      label.htmlFor = cb.id;
+      label.textContent = meta.text;
+
+      row.appendChild(cb);
+      row.appendChild(label);
+      list.appendChild(row);
+    });
+
+    if (!list.childElementCount) {
+      const empty = document.createElement("div");
+      empty.className = "tiny";
+      empty.textContent = "All done here ✅";
+      list.appendChild(empty);
+    }
+
+    card.appendChild(list);
+    return card;
+  };
+
+  const alternatingCard = () => {
+    const eod = state.settings.every_other_day;
+    if (!eod?.taskId) return null;
+    if (!isEveryOtherDayDue()) return null;
+
+    const id = eod.taskId;
+    const meta = state.settings.tasks[id];
+    if (!meta) return null;
+    if (state.settings.hideCompleted && isDone(id)) return null;
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const t = document.createElement("p");
+    t.className = "secTitle";
+    t.textContent = "Every Other Day";
+    card.appendChild(t);
+
+    const sub = document.createElement("div");
+    sub.className = "sub";
+    sub.style.marginBottom = "10px";
+    sub.textContent = "Shows only on due days. Tick → disappears. No backlog.";
+    card.appendChild(sub);
+
+    const row = document.createElement("div");
+    row.className = "task";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.id = "cb_" + id;
+    cb.checked = isDone(id);
+    cb.addEventListener("change", () => setDone(id, cb.checked));
+
+    const label = document.createElement("label");
+    label.htmlFor = cb.id;
+    label.textContent = meta.text;
+
+    row.appendChild(cb);
+    row.appendChild(label);
+    card.appendChild(row);
+    return card;
+  };
+
+  const allVisibleTasksDone = () => {
+    const visible = visibleTaskIdsForToday();
+    return visible.every(id => isDone(id));
+  };
+
+  const render = () => {
+    appEl.innerHTML = "";
+
+    settingsBox.value = JSON.stringify(state.settings, null, 2);
+
+    const streak = computeStreak();
+    streakPill.textContent = `Streak: ${streak}`;
+
+    const { doneCount, required } = anchorsStatus();
+    anchorPill.textContent = `Anchors: ${doneCount}/${required}`;
+
+    if (state.settings.showDoneScreen && allVisibleTasksDone()) {
+      const done = document.createElement("div");
+      done.className = "card done";
+      done.innerHTML = `
+        <h2>Done for Today ✅</h2>
+        <p>You earned rest. Open again tonight to close the day properly.</p>
+        <div class="hr"></div>
+        <div class="tiny">If you want extra momentum, do one small bonus… then stop.</div>
+      `;
+      appEl.appendChild(done);
+      return;
+    }
+
+    (state.settings.sections || []).forEach(sec => {
+      appEl.appendChild(sectionCard(sec.title, sec.info, sec.taskIds));
+    });
+
+    const alt = alternatingCard();
+    if (alt) appEl.appendChild(alt);
+  };
+
+  // Buttons
+  document.getElementById("saveSettings").addEventListener("click", () => {
+    const next = safeParse(settingsBox.value, null);
+    if (!next) return alert("Settings JSON invalid. Nothing saved.");
+    state.settings = next;
+    focusPhrase.textContent = state.settings.profile?.focusPhrase || defaultSettings.profile.focusPhrase;
+    saveState(state);
+    render();
+    alert("Saved ✅");
+  });
+
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type:"application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `momentum-backup-${D}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("importBtn").addEventListener("click", () => {
+    const inp = document.createElement("input");
+    inp.type = "file";
+    inp.accept = "application/json";
+    inp.onchange = () => {
+      const file = inp.files && inp.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const imported = safeParse(reader.result, null);
+        if (!imported?.settings || !imported?.days) return alert("That file doesn’t look like a Momentum backup.");
+        localStorage.setItem(LS_KEY, JSON.stringify(imported));
+        location.reload();
+      };
+      reader.readAsText(file);
+    };
+    inp.click();
+  });
+
+  document.getElementById("resetTodayBtn").addEventListener("click", () => {
+    if (!confirm("Reset today? This will untick all tasks for today only.")) return;
+    state.days[D].done = {};
+    state.days[D].lastUpdated = Date.now();
+    saveState(state);
+    render();
+  });
+
+  render();
 })();
 </script>
 </body>
