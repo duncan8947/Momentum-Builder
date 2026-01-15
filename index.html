@@ -21,7 +21,7 @@
     .task:hover{ border-color: var(--line); }
     input[type="checkbox"]{ width:20px; height:20px; margin-top:2px; }
     .task label{ flex:1; cursor:pointer; }
-    .pill{ font-size:12px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted); }
+    .pill{ font-size:12px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted); background:transparent; }
     .btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
     button{
       background:#1c1c1c; color:var(--text);
@@ -32,15 +32,13 @@
     button:hover{ filter:brightness(1.1); }
     button.primary{ background:#2a2a2a; }
     textarea{
-      width:100%; min-height:160px; resize:vertical;
+      width:100%; min-height:180px; resize:vertical;
       background:#101010; color:var(--text);
       border:1px solid var(--line);
       border-radius:12px; padding:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size:12px; line-height:1.4;
     }
-    .done{
-      text-align:center; padding:28px 14px;
-    }
+    .done{ text-align:center; padding:28px 14px; }
     .done h2{ margin:0 0 8px 0; font-size:22px; }
     .done p{ margin:0; color:var(--muted); }
     .hr{ height:1px; background:var(--line); margin:10px 0; }
@@ -63,38 +61,39 @@
           <div style="font-weight:700" id="focusPhrase"></div>
           <div class="sub">Open twice a day: morning + evening. Tick → it disappears.</div>
         </div>
-        <div class="pill" id="anchorPill">Anchors: 0/3</div>
+        <div class="pill" id="anchorPill">Anchors: 0/5</div>
       </div>
     </div>
 
     <div id="app"></div>
 
+    <!-- SETTINGS (TOGGLED) -->
     <div class="card">
-    <div class="card">
-  <div class="row">
-    <p class="secTitle" style="margin:0">Settings</p>
-    <button id="toggleSettings" class="pill">⚙️ Open</button>
+      <div class="row">
+        <p class="secTitle" style="margin:0">Settings</p>
+        <button id="toggleSettings" class="pill">⚙️ Open</button>
+      </div>
+
+      <div id="settingsPanel" style="display:none; margin-top:12px;">
+        <div class="sub" style="margin-bottom:10px;">
+          Only change this if we agree to tweak. For 7 days: don’t touch it 😄
+        </div>
+
+        <textarea id="settingsBox"></textarea>
+
+        <div class="btns">
+          <button class="primary" id="saveSettings">Save Settings</button>
+          <button id="exportBtn">Export Data</button>
+          <button id="importBtn">Import Data</button>
+          <button id="resetTodayBtn">Reset Today (untick all)</button>
+        </div>
+
+        <div class="tiny" style="margin-top:10px;">
+          Tip: Export once a week so you’ve got a backup.
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div id="settingsPanel" style="display:none; margin-top:12px;">
-    <div class="sub" style="margin-bottom:10px;">
-      Only change this if we agree to tweak. For 7 days: don’t touch it 😄
-    </div>
-
-    <textarea id="settingsBox"></textarea>
-
-    <div class="btns">
-      <button class="primary" id="saveSettings">Save Settings</button>
-      <button id="exportBtn">Export Data</button>
-      <button id="importBtn">Import Data</button>
-      <button id="resetTodayBtn">Reset Today (untick all)</button>
-    </div>
-
-    <div class="tiny" style="margin-top:10px;">
-      Tip: Export once a week so you’ve got a backup.
-    </div>
-  </div>
-</div>
 
 <script>
 (() => {
@@ -114,58 +113,56 @@
 
   const safeParse = (s, fb) => { try { const v = JSON.parse(s); return v ?? fb; } catch { return fb; } };
 
+  // ✅ DEFAULTS updated to match your final structure
   const defaultSettings = {
     profile: { name: "Duncan", focusPhrase: "I do the next right action — every day." },
 
-    // Tick ANY 3 of these to protect streak
+    // ✅ Must complete ALL 5 to protect streak
     anchors: [
       { id:"move_body", text:"Move body (workout OR walk/run Dumbo)" },
+      { id:"post_workout_breakfast", text:"Post-workout Herbalife breakfast" },
       { id:"personal_care", text:"Personal care routine (wash/shower, shave/trim, skincare)" },
       { id:"invite_block", text:"Invite (1 hour OR 5 numbers)" },
       { id:"admin_or_pd", text:"Admin (1 hr max) OR Personal development (30 mins)" }
     ],
-    anchors_required: 3,
+    anchors_required: 5,
 
+    // ✅ Order: Pre-workout BEFORE anchors; breakfast directly after move body (inside anchors list)
     sections: [
       {
+        title: "Life & Fuel (Start)",
+        info: "Do this before anchors. Tick → disappears.",
+        taskIds: ["pre_workout_drink"]
+      },
+      {
         title: "Daily Anchors (streak protection)",
-        info: "Tick any 3 to protect streak. Items disappear when ticked.",
-        taskIds: ["move_body","personal_care","invite_block","admin_or_pd"]
+        info: "Complete all 5 to protect your streak. Items disappear when ticked.",
+        taskIds: ["move_body","post_workout_breakfast","personal_care","invite_block","admin_or_pd"]
       },
       {
         title: "Business",
         info: "Tick → disappears. No numbers. No totals. Just done.",
-        taskIds: [
-          "follow_up_inviting",
-          "post_ig_fb",
-          "collate_inviting",
-          "follow_up_engagement",
-          "connect_coach"
-        ]
+        taskIds: ["follow_up_inviting","post_ig_fb","collate_inviting","follow_up_engagement","connect_coach"]
       },
       {
-        title: "Life & Fuel",
-        info: "Keep it simple. Basics only.",
-        taskIds: [
-          "pre_post_breakfast",
-          "lunch_dishes",
-          "dinner"
-        ]
+        title: "Life & Fuel (Meals)",
+        info: "Basics only.",
+        taskIds: ["lunch_dishes","dinner"]
       },
       {
         title: "Evening Reset",
         info: "Close the day properly.",
-        taskIds: [
-          "club_receipts",
-          "bath",
-          "pack_bag"
-        ]
+        taskIds: ["club_receipts","bath","pack_bag"]
       }
     ],
 
     tasks: {
+      // Life & Fuel start
+      pre_workout_drink: { text:"Pre-workout drink", type:"daily" },
+
       // Anchors
       move_body: { text:"Move body (workout OR walk/run Dumbo)", type:"daily" },
+      post_workout_breakfast: { text:"Post-workout Herbalife breakfast", type:"daily" },
       personal_care: { text:"Personal care routine (wash/shower, shave/trim, skincare)", type:"daily" },
       invite_block: { text:"Invite (1 hour OR 5 numbers)", type:"daily" },
       admin_or_pd: { text:"Admin (1 hr max) OR Personal development (30 mins)", type:"daily" },
@@ -177,28 +174,25 @@
       follow_up_engagement: { text:"Follow up likes & comments", type:"daily" },
       connect_coach: { text:"Connect with 1 coach", type:"daily" },
 
-      // Alternating task
+      // Alternating
       guinea_pig: { text:"🐹 Send 5 Guinea Pig invites", type:"every_other_day" },
 
-      // Life & fuel
-      pre_post_breakfast: { text:"Pre-workout drink + post-workout Herbalife breakfast", type:"daily" },
+      // Meals
       lunch_dishes: { text:"Eat lunch + clear dishes", type:"daily" },
       dinner: { text:"Eat dinner", type:"daily" },
 
-      // Evening
+      // Evening reset
       club_receipts: { text:"Complete club receipts (check SumUp)", type:"daily" },
       bath: { text:"Bath", type:"daily" },
       pack_bag: { text:"Pack bag for tomorrow", type:"daily" }
     },
 
-    // Alternating behaviour
     every_other_day: {
       taskId: "guinea_pig",
-      // Start from TODAY by default (you can change this to any YYYY-MM-DD)
+      // Default start date is today, but once you saved your settings it will keep your existing one.
       start_date: today()
     },
 
-    // UI/behaviour
     hideCompleted: true,
     showDoneScreen: true
   };
@@ -206,10 +200,22 @@
   const loadState = () => {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return { settings: defaultSettings, days: {} };
+
     const parsed = safeParse(raw, { settings: defaultSettings, days: {} });
-    // Ensure defaults exist
     parsed.settings = parsed.settings || defaultSettings;
     parsed.days = parsed.days || {};
+
+    // If someone has an older settings format, keep their saved settings.
+    // Only fill missing keys so nothing breaks.
+    parsed.settings.profile = parsed.settings.profile || defaultSettings.profile;
+    parsed.settings.anchors = parsed.settings.anchors || defaultSettings.anchors;
+    parsed.settings.anchors_required = parsed.settings.anchors_required ?? defaultSettings.anchors_required;
+    parsed.settings.sections = parsed.settings.sections || defaultSettings.sections;
+    parsed.settings.tasks = parsed.settings.tasks || defaultSettings.tasks;
+    parsed.settings.every_other_day = parsed.settings.every_other_day || defaultSettings.every_other_day;
+    parsed.settings.hideCompleted = parsed.settings.hideCompleted ?? defaultSettings.hideCompleted;
+    parsed.settings.showDoneScreen = parsed.settings.showDoneScreen ?? defaultSettings.showDoneScreen;
+
     return parsed;
   };
 
@@ -243,10 +249,8 @@
 
   const visibleTaskIdsForToday = () => {
     const ids = new Set();
-    // All section tasks
     (state.settings.sections || []).forEach(sec => (sec.taskIds||[]).forEach(id => ids.add(id)));
 
-    // Add alternating task only if due today
     const eod = state.settings.every_other_day;
     if (eod && eod.taskId && isEveryOtherDayDue()) ids.add(eod.taskId);
 
@@ -264,19 +268,16 @@
 
   const anchorsStatus = () => {
     const anchors = state.settings.anchors || [];
-    const required = state.settings.anchors_required ?? 3;
+    const required = state.settings.anchors_required ?? 5;
     const doneCount = anchors.filter(a => isDone(a.id)).length;
     return { doneCount, required };
   };
 
   const computeStreak = () => {
-    // streak counts consecutive days (including today if protected) where anchors_done >= required
-    const required = state.settings.anchors_required ?? 3;
-
-    const keys = Object.keys(state.days).sort(); // YYYY-MM-DD sorts naturally
+    const required = state.settings.anchors_required ?? 5;
+    const keys = Object.keys(state.days).sort();
     if (keys.length === 0) return 0;
 
-    // walk backwards from today
     let streak = 0;
     let cursor = new Date(D + "T00:00:00");
 
@@ -306,6 +307,7 @@
   const sectionCard = (title, info, taskIds) => {
     const card = document.createElement("div");
     card.className = "card";
+
     const t = document.createElement("p");
     t.className = "secTitle";
     t.textContent = title;
@@ -320,11 +322,9 @@
     }
 
     const list = document.createElement("div");
-
     const visibleIds = visibleTaskIdsForToday();
     const filtered = (taskIds || []).filter(id => visibleIds.includes(id));
 
-    // If alternating task isn't in the section, we will render it in its own card below.
     filtered.forEach(id => {
       const taskMeta = state.settings.tasks[id];
       if (!taskMeta) return;
@@ -364,14 +364,12 @@
     const eod = state.settings.every_other_day;
     if (!eod || !eod.taskId) return null;
 
-    const due = isEveryOtherDayDue();
-    if (!due) return null;
+    if (!isEveryOtherDayDue()) return null;
 
     const id = eod.taskId;
     const meta = state.settings.tasks[id];
     if (!meta) return null;
 
-    // If hidden completed and done, don't show
     if (state.settings.hideCompleted && isDone(id)) return null;
 
     const card = document.createElement("div");
@@ -409,9 +407,6 @@
 
   const allVisibleTasksDone = () => {
     const visible = visibleTaskIdsForToday();
-    // Consider only tasks that are actually part of today's UI:
-    // section tasks + due alternating
-    // If hideCompleted is on, completion means they disappear, but for done screen we check all tasks for the day.
     return visible.every(id => isDone(id));
   };
 
@@ -442,28 +437,28 @@
       return;
     }
 
-    // Sections
+    // Sections in order
     (state.settings.sections || []).forEach(sec => {
       appEl.appendChild(sectionCard(sec.title, sec.info, sec.taskIds));
     });
 
-    // Alternating card (if due)
+    // Alternating (if due)
     const alt = alternatingCard();
     if (alt) appEl.appendChild(alt);
   };
 
-  // Buttons
+  // Save Settings
   document.getElementById("saveSettings").addEventListener("click", () => {
     const next = safeParse(settingsBox.value, null);
     if (!next) return alert("Settings JSON invalid. Don’t panic — nothing saved.");
     state.settings = next;
-    // refresh focus phrase
     focusPhrase.textContent = state.settings?.profile?.focusPhrase || defaultSettings.profile.focusPhrase;
     saveState(state);
     render();
     alert("Saved ✅");
   });
 
+  // Export Data
   document.getElementById("exportBtn").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -476,6 +471,7 @@
     URL.revokeObjectURL(url);
   });
 
+  // Import Data
   document.getElementById("importBtn").addEventListener("click", () => {
     const inp = document.createElement("input");
     inp.type = "file";
@@ -498,6 +494,7 @@
     inp.click();
   });
 
+  // Reset Today
   document.getElementById("resetTodayBtn").addEventListener("click", () => {
     if (!confirm("Reset today? This will untick all tasks for today only.")) return;
     state.days[D].done = {};
@@ -505,6 +502,17 @@
     saveState(state);
     render();
   });
+
+  // ✅ Settings toggle (no hunting for render needed)
+  const toggleBtn = document.getElementById("toggleSettings");
+  const panel = document.getElementById("settingsPanel");
+  if (toggleBtn && panel) {
+    toggleBtn.addEventListener("click", () => {
+      const open = panel.style.display === "block";
+      panel.style.display = open ? "none" : "block";
+      toggleBtn.textContent = open ? "⚙️ Open" : "✖ Close";
+    });
+  }
 
   render();
 })();
