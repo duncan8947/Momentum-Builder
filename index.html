@@ -1,113 +1,96 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Momentum Tracker</title>
-  <meta name="theme-color" content="#0b0b0b" />
-  <style>
-    :root { --bg:#0b0b0b; --card:#131313; --muted:#a8a8a8; --text:#f2f2f2; --line:#242424; }
-    *{ box-sizing:border-box; }
-    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--text); }
-    .wrap{ max-width:720px; margin:0 auto; padding:18px; }
-    header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-    h1{ font-size:18px; margin:0; }
-    .date{ color:var(--muted); font-size:13px; }
-    .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; margin:12px 0; }
-    .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
-    .secTitle{ font-size:13px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin:0 0 10px 0; }
-    .sub{ color:var(--muted); font-size:13px; margin-bottom:10px; }
-    .task{ display:flex; gap:10px; padding:10px 8px; }
-    input[type="checkbox"]{ width:20px; height:20px; }
-    label{ cursor:pointer; }
-    .pill{ font-size:12px; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted); }
-    textarea{ width:100%; min-height:180px; background:#101010; color:var(--text); border:1px solid var(--line); border-radius:12px; padding:10px; font-family:monospace; }
-    button{ background:#1c1c1c; color:var(--text); border:1px solid var(--line); border-radius:12px; padding:10px 12px; cursor:pointer; }
-    .btns{ display:flex; gap:10px; flex-wrap:wrap; }
-    .done{text-align:center;padding:28px}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Momentum Tracker</title>
+<meta name="theme-color" content="#0b0b0b">
+<style>
+:root{--bg:#0b0b0b;--card:#131313;--muted:#a8a8a8;--text:#f2f2f2;--line:#242424}
+body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
+header{display:flex;justify-content:space-between;align-items:center}
+h1{font-size:18px;margin:0}
+.date{color:var(--muted);font-size:13px}
+.secTitle{font-size:13px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:0 0 10px}
+.task{display:flex;gap:10px;padding:8px}
+input{width:20px;height:20px}
+label{cursor:pointer}
+.pill{font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.sub{color:var(--muted);font-size:13px}
+textarea{width:100%;min-height:180px;background:#101010;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px;font-family:monospace}
+button{background:#1c1c1c;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+</style>
 </head>
 
 <body>
 <div class="wrap">
 
 <header>
-  <div>
-    <h1>Momentum Tracker</h1>
-    <div class="date" id="dateLine"></div>
-  </div>
-  <div class="pill" id="streakPill">Streak: 0</div>
+<div>
+<h1>Momentum Tracker</h1>
+<div class="date" id="dateLine"></div>
+</div>
+<div class="pill" id="streakPill">Streak: 0</div>
 </header>
 
 <div class="card">
-  <div class="row">
-    <div>
-      <strong>I do the next right action — every day.</strong>
-      <div class="sub">Tick → it disappears</div>
-    </div>
-    <div class="pill" id="anchorPill">Anchors: 0/5</div>
-  </div>
+<strong>I do the next right action — every day.</strong>
+<div class="sub">Tick → it disappears</div>
+<div class="pill" id="anchorPill">Anchors: 0/5</div>
 </div>
 
 <div id="app"></div>
 
-<!-- SETTINGS -->
 <div class="card">
-  <details>
-    <summary class="row" style="cursor:pointer;">
-      <p class="secTitle">Settings</p>
-      <span class="pill">Tap to open</span>
-    </summary>
-
-    <div>
-      <div class="sub">Only change if we agree to tweak 😄</div>
-      <textarea id="settingsBox"></textarea>
-      <div class="btns">
-        <button id="saveSettings">Save Settings</button>
-        <button id="exportBtn">Export</button>
-        <button id="importBtn">Import</button>
-        <button id="resetTodayBtn">Reset Today</button>
-      </div>
-    </div>
-  </details>
+<details>
+<summary class="secTitle">Settings (tap to open)</summary>
+<textarea id="settingsBox"></textarea>
+<div class="btns">
+<button id="saveSettings">Save</button>
+<button id="resetToday">Reset Today</button>
+</div>
+</details>
 </div>
 
 </div>
 
 <script>
 (() => {
-const LS="momentum_v1";
+const LS="momentum_final";
 const today=()=>new Date().toISOString().slice(0,10);
 const pretty=d=>new Date(d).toDateString();
 
 const defaults={
- anchors_required:5,
- anchors:["move","breakfast","care","invite","admin"],
- sections:[
-  ["Life & Fuel (Start)",["pre"]],
-  ["Daily Anchors",["move","breakfast","care","invite","admin"]],
-  ["Business",["followup","post","collate","engage","coach"]],
-  ["Life & Fuel (Meals)",["lunch","dinner"]],
-  ["Evening Reset",["receipts","bath","bag"]]
- ],
- tasks:{
-  pre:"Pre-workout drink",
-  move:"Move body (workout or walk/run Dumbo)",
-  breakfast:"Post-workout Herbalife breakfast",
-  care:"Personal care routine",
-  invite:"Invite (1hr or 5 numbers)",
-  admin:"Admin (1hr) or Personal development (30m)",
-  followup:"Follow up inviting",
-  post:"Write & post IG + FB",
-  collate:"Collate inviting activity",
-  engage:"Follow up likes/comments",
-  coach:"Connect with 1 coach",
-  lunch:"Eat lunch + clear dishes",
-  dinner:"Eat dinner",
-  receipts:"Complete club receipts (SumUp)",
-  bath:"Bath",
-  bag:"Pack bag for tomorrow"
- }
+anchors:["move","breakfast","care","invite","admin"],
+anchors_required:5,
+sections:[
+{title:"Life & Fuel (Start)",tasks:["pre"]},
+{title:"Daily Anchors",tasks:["move","breakfast","care","invite","admin"]},
+{title:"Business",tasks:["followup","post","collate","engage","coach"]},
+{title:"Life & Fuel (Meals)",tasks:["lunch","dinner"]},
+{title:"Evening Reset",tasks:["receipts","bath","bag"]}
+],
+tasks:{
+pre:"Pre-workout drink",
+move:"Move body (workout or walk/run Dumbo)",
+breakfast:"Post-workout Herbalife breakfast",
+care:"Personal care routine",
+invite:"Invite (1hr or 5 numbers)",
+admin:"Admin (1hr) or Personal development",
+followup:"Follow up inviting",
+post:"Write & post IG + FB",
+collate:"Collate inviting activity",
+engage:"Follow up likes/comments",
+coach:"Connect with 1 coach",
+lunch:"Eat lunch + clear dishes",
+dinner:"Eat dinner",
+receipts:"Complete club receipts (SumUp)",
+bath:"Bath",
+bag:"Pack bag for tomorrow"
+}
 };
 
 const state=JSON.parse(localStorage.getItem(LS))||{settings:defaults,days:{}};
@@ -118,44 +101,44 @@ document.getElementById("dateLine").textContent=pretty(D);
 document.getElementById("settingsBox").value=JSON.stringify(state.settings,null,2);
 
 function render(){
- const app=document.getElementById("app");
- app.innerHTML="";
- let anchorDone=0;
+const app=document.getElementById("app");
+app.innerHTML="";
+let anchorsDone=0;
 
- state.settings.sections.forEach(sec=>{
-  const card=document.createElement("div");
-  card.className="card";
-  card.innerHTML=`<p class="secTitle">${sec[0]}</p>`;
-  sec[1].forEach(id=>{
-   if(state.days[D][id]) return;
-   const row=document.createElement("div");
-   row.className="task";
-   row.innerHTML=`<input type="checkbox"><label>${state.settings.tasks[id]}</label>`;
-   row.querySelector("input").onchange=()=>{
-    state.days[D][id]=true;
-    localStorage.setItem(LS,JSON.stringify(state));
-    render();
-   };
-   card.appendChild(row);
-  });
-  app.appendChild(card);
- });
+state.settings.sections.forEach(sec=>{
+const card=document.createElement("div");
+card.className="card";
+card.innerHTML=`<p class="secTitle">${sec.title}</p>`;
+sec.tasks.forEach(id=>{
+if(state.days[D][id])return;
+const row=document.createElement("div");
+row.className="task";
+row.innerHTML=`<input type="checkbox"><label>${state.settings.tasks[id]}</label>`;
+row.querySelector("input").onchange=()=>{
+state.days[D][id]=true;
+localStorage.setItem(LS,JSON.stringify(state));
+render();
+};
+card.appendChild(row);
+});
+app.appendChild(card);
+});
 
- state.settings.anchors.forEach(a=>state.days[D][a]&&anchorDone++);
- document.getElementById("anchorPill").textContent=`Anchors: ${anchorDone}/5`;
- document.getElementById("streakPill").textContent="Streak: "+anchorDone;
+state.settings.anchors.forEach(a=>state.days[D][a]&&anchorsDone++);
+document.getElementById("anchorPill").textContent=`Anchors: ${anchorsDone}/5`;
+document.getElementById("streakPill").textContent=`Streak: ${anchorsDone}`;
 }
 
 document.getElementById("saveSettings").onclick=()=>{
- state.settings=JSON.parse(document.getElementById("settingsBox").value);
- localStorage.setItem(LS,JSON.stringify(state));
- location.reload();
+state.settings=JSON.parse(document.getElementById("settingsBox").value);
+localStorage.setItem(LS,JSON.stringify(state));
+location.reload();
 };
 
-document.getElementById("resetTodayBtn").onclick=()=>{
- state.days[D]={};
- localStorage.setItem(LS,JSON.stringify(state));
- render();
+document.getElementById("resetToday").onclick=()=>{
+state.days[D]={};
+localStorage.setItem(LS,JSON.stringify(state));
+render();
 };
 
 render();
