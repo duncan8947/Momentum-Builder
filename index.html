@@ -70,22 +70,31 @@
     <div id="app"></div>
 
     <div class="card">
-      <p class="secTitle">Settings</p>
-      <div class="sub" style="margin-bottom:10px;">
-        Only change this if we agree to tweak. For 7 days: don’t touch it. 😄
-      </div>
-      <textarea id="settingsBox"></textarea>
-      <div class="btns">
-        <button class="primary" id="saveSettings">Save Settings</button>
-        <button id="exportBtn">Export Data</button>
-        <button id="importBtn">Import Data</button>
-        <button id="resetTodayBtn">Reset Today (untick all)</button>
-      </div>
-      <div class="tiny" style="margin-top:10px;">
-        Tip: Export once a week so you’ve got a backup.
-      </div>
+    <div class="card">
+  <div class="row">
+    <p class="secTitle" style="margin:0">Settings</p>
+    <button id="toggleSettings" class="pill">⚙️ Open</button>
+  </div>
+
+  <div id="settingsPanel" style="display:none; margin-top:12px;">
+    <div class="sub" style="margin-bottom:10px;">
+      Only change this if we agree to tweak. For 7 days: don’t touch it 😄
+    </div>
+
+    <textarea id="settingsBox"></textarea>
+
+    <div class="btns">
+      <button class="primary" id="saveSettings">Save Settings</button>
+      <button id="exportBtn">Export Data</button>
+      <button id="importBtn">Import Data</button>
+      <button id="resetTodayBtn">Reset Today (untick all)</button>
+    </div>
+
+    <div class="tiny" style="margin-top:10px;">
+      Tip: Export once a week so you’ve got a backup.
     </div>
   </div>
+</div>
 
 <script>
 (() => {
